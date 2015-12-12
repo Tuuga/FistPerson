@@ -51,7 +51,7 @@ public class PlayerScript : MonoBehaviour {
 					currentState = FistState.Block;
 					currentTimer = 0;
 				}
-			} else if (currentState != FistState.Block && other != FistState.Input && other != FistState.Startup) {
+			} else if (other != FistState.Input && other != FistState.Startup) {
 				currentTimer = 0;
 				currentState = FistState.Startup;
 			} else {
