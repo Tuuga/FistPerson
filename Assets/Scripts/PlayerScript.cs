@@ -32,13 +32,16 @@ public class PlayerScript : MonoBehaviour {
 			Debug.Log(currentKey + ": " + currentState);
 			if (Input.GetKey(currentKey)) {
 				currentTimer += Time.deltaTime;
-				if (currentTimer < inputDelay && other == FistState.Input && otherTimer < inputDelay) {
+				if (currentTimer < inputDelay && other == FistState.Input && otherTimer < inputDelay || other == FistState.Block) {
 					currentState = FistState.Block;
 					currentTimer = 0;
 				}
 			} else if (currentState != FistState.Block && other != FistState.Input && other != FistState.Startup) {
 				currentTimer = 0;
 				currentState = FistState.Startup;
+			} else {
+				currentTimer = 0;
+				currentState = FistState.Resting;
 			}
 		} else if (currentState == FistState.Block) {		//Block
 			Debug.Log(currentKey + ": " + currentState);
