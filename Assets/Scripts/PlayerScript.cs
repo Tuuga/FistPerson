@@ -6,7 +6,6 @@ public class PlayerScript : MonoBehaviour {
 	public GameObject rightFist;
 	public GameObject leftFist;
 	public float chargeMaxTime;
-	public float fistSpeed;
 	public float inputDelayBlock;
 	public float startupTime;
 	public float recoveryTime;
@@ -21,8 +20,13 @@ public class PlayerScript : MonoBehaviour {
 
 
 	void Update () {
-		UpdateFist(ref leftFistState, ref leftTimer, rightFistState, ref rightTimer, KeyCode.A, leftFist);		//LeftUpdate
-		UpdateFist(ref rightFistState, ref rightTimer, leftFistState, ref leftTimer , KeyCode.D, rightFist);    //RightUpdate
+		if (tag == "Player 1") {
+			UpdateFist(ref leftFistState, ref leftTimer, rightFistState, ref rightTimer, KeyCode.A, leftFist);      //LeftUpdate
+			UpdateFist(ref rightFistState, ref rightTimer, leftFistState, ref leftTimer, KeyCode.D, rightFist);    //RightUpdate
+		} else {
+			UpdateFist(ref leftFistState, ref leftTimer, rightFistState, ref rightTimer, KeyCode.LeftArrow, leftFist);      //LeftUpdate
+			UpdateFist(ref rightFistState, ref rightTimer, leftFistState, ref leftTimer, KeyCode.RightArrow, rightFist);    //RightUpdate
+		}
 
 	}
 
@@ -55,14 +59,14 @@ public class PlayerScript : MonoBehaviour {
 				currentState = FistState.Resting;
 			}
 		} else if (currentState == FistState.Block) {       //Block
-			MoveTo(fistStatePos[4].position, fistStatePos[5].position, fistObject, blockTime / 4);
+			MoveTo(fistStatePos[4].position, fistStatePos[5].position, fistObject, blockTime / 8);
 			if (showStateLogs)
 			Debug.Log(currentKey + ": " + currentState);
 			currentTimer += Time.deltaTime;
 
 			if (currentTimer > blockTime) {
 				currentTimer = 0;
-				MoveTo(fistStatePos[0].position, fistStatePos[1].position, fistObject, blockTime / 4);
+				MoveTo(fistStatePos[0].position, fistStatePos[1].position, fistObject, blockTime / 8);
 				currentState = FistState.Resting;
 			}
 
