@@ -9,6 +9,8 @@ public class PlayerScript : MonoBehaviour {
 	public GameObject rightFist;
 	public GameObject leftFist;
 	public GameObject pivot;
+	public float health;
+	public float opponentHealth;
 	public float chargeMaxTime;
 	public float blockInputTime;
 	public float dodgeInputTime;
@@ -24,6 +26,13 @@ public class PlayerScript : MonoBehaviour {
 	float rightTimer;
 	public Transform[] fistStatePos;
 
+	void Start () {
+		if (tag == "Player 1") {
+			opponentHealth = GameObject.FindGameObjectWithTag("Player 2").GetComponent<PlayerScript>().health;
+		} else {
+			opponentHealth = GameObject.FindGameObjectWithTag("Player 1").GetComponent<PlayerScript>().health;
+		}
+	}
 
 	void Update () {
 
@@ -90,6 +99,7 @@ public class PlayerScript : MonoBehaviour {
 			currentTimer += Time.deltaTime;
 			if (currentTimer > startupTime) {
 				currentTimer = 0;
+				Damage();
 				currentState = FistState.Recovery;
 			}
 		} else if (currentState == FistState.Recovery) {    //Recovery
@@ -119,13 +129,13 @@ public class PlayerScript : MonoBehaviour {
 		if (currentTimer < otherTimer) {
 			if (currentKey == leftInput) {
 				//Dodge left
-				RotatePivot(currentKey, currentState);
+				//RotatePivot(currentKey, currentState);
 				MoveTo(fistStatePos[8].position, fistStatePos[9].position, leftFist, dodgeTime / 4);
 				MoveTo(fistStatePos[8].position, fistStatePos[9].position, rightFist, dodgeTime / 4);
 
 			} else if (currentKey == rightInput) {
 				//Dodge right
-				RotatePivot(currentKey, currentState);
+				//RotatePivot(currentKey, currentState);
 				MoveTo(fistStatePos[10].position, fistStatePos[11].position, leftFist, dodgeTime / 4);
 				MoveTo(fistStatePos[10].position, fistStatePos[11].position, rightFist, dodgeTime / 4);
 			}
@@ -137,5 +147,8 @@ public class PlayerScript : MonoBehaviour {
 		} else {
 			pivot.transform.rotation *= Quaternion.Euler(0, 0, -1 * dodgeTime);
 		}
+	}
+	void Damage () {
+		//opponentHealth -= 10;
 	}
 }
