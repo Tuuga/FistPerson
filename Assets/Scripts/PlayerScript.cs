@@ -6,35 +6,54 @@ public class PlayerScript : MonoBehaviour {
 	public KeyCode leftInput;
 	public KeyCode rightInput;
 
+	public GameObject hitEffect;
 	public GameObject rightFist;
 	public GameObject leftFist;
 	public GameObject pivot;
 	public float health;
 	public float opponentHealth;
+	public float punchDamage;
 	public float chargeMaxTime;
+	float currentChargeTime;
 	public float blockInputTime;
 	public float dodgeInputTime;
 	public float startupTime;
+	public float staggerTime;
 	public float recoveryTime;
 	public float blockTime;
 	public float dodgeTime;
 	public bool showStateLogs;
-	enum FistState { Resting, Input, Block, Dodge, Startup, Recovery };
+
+	[HideInInspector]
+	public bool leftDodge;
+	[HideInInspector]
+	public bool rightDodge;
+	bool opponentLeftDodge;
+	bool opponentRightDodge;
+
+	GameObject opponent;
+	enum FistState { Resting, Input, Block, Dodge, Startup, Stagger, Recovery };
 	FistState leftFistState;
 	FistState rightFistState;
+	FistState opponentLeftFistState;
+	FistState opponentRightFistState;
 	float leftTimer;
 	float rightTimer;
 	public Transform[] fistStatePos;
 
 	void Start () {
 		if (tag == "Player 1") {
-			opponentHealth = GameObject.FindGameObjectWithTag("Player 2").GetComponent<PlayerScript>().health;
+			opponent = GameObject.FindGameObjectWithTag("Player 2");
 		} else {
-			opponentHealth = GameObject.FindGameObjectWithTag("Player 1").GetComponent<PlayerScript>().health;
+			opponent = GameObject.FindGameObjectWithTag("Player 1");
 		}
 	}
 
 	void Update () {
+		opponentLeftFistState = opponent.GetComponent<PlayerScript>().leftFistState;
+		opponentRightFistState = opponent.GetComponent<PlayerScript>().rightFistState;
+		opponentLeftDodge = opponent.GetComponent<PlayerScript>().leftDodge;
+		opponentRightDodge = opponent.GetComponent<PlayerScript>().rightDodge;
 
 		UpdateFist(ref leftFistState, ref leftTimer, rightFistState, ref rightTimer, leftInput, leftFist);      //LeftUpdate
 		UpdateFist(ref rightFistState, ref rightTimer, leftFistState, ref leftTimer, rightInput, rightFist);    //RightUpdate
@@ -57,6 +76,7 @@ public class PlayerScript : MonoBehaviour {
 				Debug.Log(currentKey + ": " + currentState);
 			if (Input.GetKey(currentKey)) {
 				currentTimer += Time.deltaTime;
+				currentChargeTime = currentTimer;
 				if (currentTimer < blockInputTime && other == FistState.Input && otherTimer < blockInputTime || other == FistState.Block) {
 					currentState = FistState.Block;
 					currentTimer = 0;
@@ -84,11 +104,13 @@ public class PlayerScript : MonoBehaviour {
 
 		} else if (currentState == FistState.Dodge) {       //Dodge
 			if (showStateLogs)
-			Debug.Log(currentKey + ": " + currentState);
+				Debug.Log(currentKey + ": " + currentState);
 			currentTimer += Time.deltaTime;
 			if (currentTimer > dodgeTime) {
 				currentTimer = 0;
 				currentState = FistState.Resting;
+				leftDodge = false;
+				rightDodge = false;
 			}
 			Dodge(ref currentTimer, otherTimer, currentKey, ref currentState);
 
@@ -99,9 +121,24 @@ public class PlayerScript : MonoBehaviour {
 			currentTimer += Time.deltaTime;
 			if (currentTimer > startupTime) {
 				currentTimer = 0;
-				Damage();
+				if (opponentLeftFistState == FistState.Block) {
+					currentState = FistState.Stagger;
+					other = FistState.Stagger;
+				} else if ((currentKey == leftInput && opponentLeftDodge) || (currentKey == rightInput && opponentRightDodge)) {
+					currentState = FistState.Stagger;
+					other = FistState.Stagger;
+				} else {
+					Damage(fistObject, currentChargeTime);
+					currentState = FistState.Recovery;
+				}
+			}
+		} else if (currentState == FistState.Stagger) {     //Stagger
+			currentTimer += Time.deltaTime;
+			if (currentTimer > staggerTime) {
+				currentTimer = 0;
 				currentState = FistState.Recovery;
 			}
+
 		} else if (currentState == FistState.Recovery) {    //Recovery
 			MoveTo(fistStatePos[0].position, fistStatePos[1].position, fistObject, recoveryTime);
 			if (showStateLogs)
@@ -128,13 +165,13 @@ public class PlayerScript : MonoBehaviour {
 	void Dodge (ref float currentTimer, float otherTimer, KeyCode currentKey, ref FistState currentState) {
 		if (currentTimer < otherTimer) {
 			if (currentKey == leftInput) {
-				//Dodge left
+				leftDodge = true;
 				//RotatePivot(currentKey, currentState);
 				MoveTo(fistStatePos[8].position, fistStatePos[9].position, leftFist, dodgeTime / 4);
 				MoveTo(fistStatePos[8].position, fistStatePos[9].position, rightFist, dodgeTime / 4);
 
 			} else if (currentKey == rightInput) {
-				//Dodge right
+				rightDodge = true;
 				//RotatePivot(currentKey, currentState);
 				MoveTo(fistStatePos[10].position, fistStatePos[11].position, leftFist, dodgeTime / 4);
 				MoveTo(fistStatePos[10].position, fistStatePos[11].position, rightFist, dodgeTime / 4);
@@ -148,7 +185,21 @@ public class PlayerScript : MonoBehaviour {
 			pivot.transform.rotation *= Quaternion.Euler(0, 0, -1 * dodgeTime);
 		}
 	}
-	void Damage () {
-		//opponentHealth -= 10;
+	void Damage (GameObject fist, float chargeTime) {
+		opponentHealth = opponent.GetComponent<PlayerScript>().health;
+		opponentHealth -= Mathf.Clamp(punchDamage * (1 + chargeTime), 0, opponentHealth);
+		opponent.GetComponent<PlayerScript>().leftFistState = FistState.Stagger;
+		opponent.GetComponent<PlayerScript>().rightFistState = FistState.Stagger;
+		opponent.GetComponent<PlayerScript>().health = opponentHealth;
+
+		//Spawns effect when you hit
+		GameObject hitIns = (GameObject)Instantiate(hitEffect, fist.transform.position, new Quaternion(0, 0, 0, 0));
+		//Only shows for the player who hit
+		if (tag == "Player 1") {
+			hitIns.layer = 12;	//Player1Inv
+		} else {
+			hitIns.layer = 13;	//Player2Inv
+		}
+		Destroy(hitIns, 2);		//HARD CODE (destroys after 2sec)
 	}
 }
