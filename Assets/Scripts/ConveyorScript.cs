@@ -30,7 +30,8 @@ public class ConveyorScript : MonoBehaviour {
 	}
 	void SpawnObject () {
 		int randInd = Random.Range(0, objects.Length);
-		GameObject objIns = (GameObject)Instantiate(objects[randInd], spawnPoint.transform.position, new Quaternion(0, 0, 0, 0));
+		float randRot = Random.Range(0, 360);
+		GameObject objIns = (GameObject)Instantiate(objects[randInd], spawnPoint.transform.position, Quaternion.Euler(0, randRot, 0));
 		allObjects.Add(objIns);
 	}
 	void MoveObjects() {

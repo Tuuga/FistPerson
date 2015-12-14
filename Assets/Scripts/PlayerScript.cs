@@ -10,6 +10,7 @@ public class PlayerScript : MonoBehaviour {
 	public GameObject rightFist;
 	public GameObject leftFist;
 	public GameObject pivot;
+	public bool conveyorMode;
 	public float health;
 	public float opponentHealth;
 	public float punchDamage;
@@ -77,10 +78,10 @@ public class PlayerScript : MonoBehaviour {
 			if (Input.GetKey(currentKey)) {
 				currentTimer += Time.deltaTime;
 				currentChargeTime = currentTimer;
-				if (currentTimer < blockInputTime && other == FistState.Input && otherTimer < blockInputTime || other == FistState.Block) {
+				if (currentTimer < blockInputTime && other == FistState.Input && otherTimer < blockInputTime && conveyorMode == false || other == FistState.Block) {
 					currentState = FistState.Block;
 					currentTimer = 0;
-				} else if (currentTimer < dodgeInputTime && otherTimer < dodgeInputTime && other == FistState.Input || other == FistState.Dodge) {
+				} else if (currentTimer < dodgeInputTime && otherTimer < dodgeInputTime && other == FistState.Input && conveyorMode == false || other == FistState.Dodge) {
 					currentState = FistState.Dodge;
 				}
 			} else if (other != FistState.Input && other != FistState.Startup) {
@@ -128,7 +129,9 @@ public class PlayerScript : MonoBehaviour {
 					currentState = FistState.Stagger;
 					other = FistState.Stagger;
 				} else {
-					Damage(fistObject, currentChargeTime);
+					if (conveyorMode == false) {
+						Damage(fistObject, currentChargeTime);
+					}
 					currentState = FistState.Recovery;
 				}
 			}
