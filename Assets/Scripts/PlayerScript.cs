@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerScript : MonoBehaviour {
 
 	public KeyCode leftInput;
 	public KeyCode rightInput;
+	KeyCode lastKey;
 
+	public GameObject leftConv;
+	public GameObject rightConv;
 	public GameObject hitEffect;
 	public GameObject rightFist;
 	public GameObject leftFist;
@@ -41,8 +45,14 @@ public class PlayerScript : MonoBehaviour {
 	float leftTimer;
 	float rightTimer;
 	public Transform[] fistStatePos;
+	//Lists for fists
+	List<GameObject> leftFistObjects;
+	List<GameObject> rightFistObjects;
 
 	void Start () {
+		leftFistObjects = new List<GameObject>();
+		rightFistObjects = new List<GameObject>();
+
 		if (tag == "Player 1") {
 			opponent = GameObject.FindGameObjectWithTag("Player 2");
 		} else {
@@ -67,6 +77,7 @@ public class PlayerScript : MonoBehaviour {
 			if (showStateLogs)
 				Debug.Log(currentKey + ": " + currentState);
 			if (Input.GetKeyDown(currentKey)) {
+				lastKey = currentKey;
 				currentState = FistState.Input;
 				currentTimer = 0;
 
@@ -204,5 +215,24 @@ public class PlayerScript : MonoBehaviour {
 			hitIns.layer = 13;	//Player2Inv
 		}
 		Destroy(hitIns, 2);		//HARD CODE (destroys after 2sec)
+	}
+
+	void AddObject (Collider c) {
+		if (lastKey == leftInput) {
+			//attach to left fist
+			c.transform.SetParent(leftFist.transform);
+			leftFistObjects.Add(c.gameObject);
+			leftConv.GetComponent<ConveyorScript>().allObjects.Remove(c.gameObject);
+		} else {
+			//attach to right fist
+			c.transform.SetParent(rightFist.transform);
+			rightFistObjects.Add(c.gameObject);
+			rightConv.GetComponent<ConveyorScript>().allObjects.Remove(c.gameObject);
+		}
+	}
+	void OnTriggerEnter (Collider c) {
+		if (c.tag == "Object" && conveyorMode == true) {
+			AddObject(c);
+		}
 	}
 }

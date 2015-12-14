@@ -5,14 +5,13 @@ using System.Collections.Generic;
 public class ConveyorScript : MonoBehaviour {
 
 	public GameObject[] objects;
-	List<GameObject> allObjects;
+	[HideInInspector]
+	public List<GameObject> allObjects;
 	public GameObject spawnPoint;
 	public GameObject trashCan;
 	public float spawnTime;
 	public float objectSpeed;
 	public float timer;
-	List<GameObject> leftFistObjects;
-	List<GameObject> rightFistObjects;
 	Vector3 trashCanPos;
 
 	void Start () {
