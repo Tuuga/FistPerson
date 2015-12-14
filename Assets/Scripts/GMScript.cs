@@ -5,9 +5,11 @@ using System.Collections;
 
 public class GMScript : MonoBehaviour {
 
+	public string map;
 	public Text countdownText;
 	public Text p1Text;
 	public Text p2Text;
+	public GameObject endScreen;
 	public float countdown;
 	public float ringDelay;
 	public GameObject ring;
@@ -49,7 +51,7 @@ public class GMScript : MonoBehaviour {
 	}
 
 	public void StartGame () {
-		SceneManager.LoadScene("Tuukka");
+		SceneManager.LoadScene(map);
 	}
 	public void Exit () {
 		Application.Quit();
@@ -75,5 +77,10 @@ public class GMScript : MonoBehaviour {
 			p1Text.text = "You lost...";
 			p2Text.text = "You won!";
 		}
+		Time.timeScale = 0;
+		endScreen.SetActive(true);
+	}
+	public void Restart () {
+		SceneManager.LoadScene(map);
 	}
 }
