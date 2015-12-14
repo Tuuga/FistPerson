@@ -229,7 +229,7 @@ public class PlayerScript : MonoBehaviour {
 			leftFistObjects.Remove(leftFistObjects[0]);
 
 		} else if (rightFistObjects.Count > 0) {
-			if (leftFistObjects[0] != null) {
+			if (rightFistObjects[0] != null) {
 				dm = rightFistObjects[0].GetComponent<ObjectScript>().damageModifier;
 				rightFistObjects[0].GetComponentInChildren<MeshCollider>().enabled = true;
 				rightFistObjects[0].transform.SetParent(null);
