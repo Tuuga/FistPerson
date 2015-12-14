@@ -40,7 +40,7 @@ public class ConveyorScript : MonoBehaviour {
 			if ((trashCanPos - pos).magnitude < 0.1f) {
 				Destroy(allObjects[i]);
 				allObjects.Remove(allObjects[i]);
-			}
+            }
 		}
 	}
 }

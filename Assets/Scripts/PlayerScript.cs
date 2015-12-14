@@ -206,6 +206,27 @@ public class PlayerScript : MonoBehaviour {
 		opponent.GetComponent<PlayerScript>().rightFistState = FistState.Stagger;
 		opponent.GetComponent<PlayerScript>().health = opponentHealth;
 
+		if (fist == leftFist && leftFistObjects.Count > 0) {
+			if (leftFistObjects[0] != null) {
+				leftFistObjects[0].GetComponentInChildren<MeshCollider>().enabled = true;
+				leftFistObjects[0].transform.SetParent(null);
+				leftFistObjects[0].GetComponent<Rigidbody>().isKinematic = false;
+				leftFistObjects[0].GetComponent<Rigidbody>().AddForce(new Vector3(1, 1, 0) * 100f);
+				Destroy(leftFistObjects[0], 3f);
+            }
+			leftFistObjects.Remove(leftFistObjects[0]);
+
+		} else if (rightFistObjects.Count > 0) {
+			if (leftFistObjects[0] != null) {
+				rightFistObjects[0].GetComponentInChildren<MeshCollider>().enabled = true;
+				rightFistObjects[0].transform.SetParent(null);
+				rightFistObjects[0].GetComponent<Rigidbody>().isKinematic = false;
+				rightFistObjects[0].GetComponent<Rigidbody>().AddForce(new Vector3(1, 1, 0) * 100f);
+				Destroy(rightFistObjects[0], 3f);
+			}
+			rightFistObjects.Remove(rightFistObjects[0]);
+		}
+
 		//Spawns effect when you hit
 		GameObject hitIns = (GameObject)Instantiate(hitEffect, fist.transform.position, new Quaternion(0, 0, 0, 0));
 		//Only shows for the player who hit
@@ -217,22 +238,26 @@ public class PlayerScript : MonoBehaviour {
 		Destroy(hitIns, 2);		//HARD CODE (destroys after 2sec)
 	}
 
-	void AddObject (Collider c) {
-		if (lastKey == leftInput) {
+	void AddObject (GameObject g) {
+		g.GetComponent<Rigidbody>().isKinematic = true;
+		g.transform.GetComponentInChildren<MeshCollider>().enabled = false;
+        if (lastKey == leftInput) {
 			//attach to left fist
-			c.transform.SetParent(leftFist.transform);
-			leftFistObjects.Add(c.gameObject);
-			leftConv.GetComponent<ConveyorScript>().allObjects.Remove(c.gameObject);
+			g.transform.SetParent(leftFist.transform);
+			leftFistObjects.Add(g);
+			leftConv.GetComponent<ConveyorScript>().allObjects.Remove(g);
+			g.transform.rotation = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
 		} else {
 			//attach to right fist
-			c.transform.SetParent(rightFist.transform);
-			rightFistObjects.Add(c.gameObject);
-			rightConv.GetComponent<ConveyorScript>().allObjects.Remove(c.gameObject);
+			g.transform.SetParent(rightFist.transform);
+			rightFistObjects.Add(g);
+			rightConv.GetComponent<ConveyorScript>().allObjects.Remove(g);
+			g.transform.rotation = Quaternion.Euler(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360));
 		}
 	}
 	void OnTriggerEnter (Collider c) {
-		if (c.tag == "Object" && conveyorMode == true) {
-			AddObject(c);
+		if (c.transform.parent.tag == "Object" && conveyorMode == true) {
+			AddObject(c.transform.parent.gameObject);
 		}
 	}
 }
