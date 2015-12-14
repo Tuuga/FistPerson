@@ -6,6 +6,8 @@ using System.Collections;
 public class GMScript : MonoBehaviour {
 
 	public Text countdownText;
+	public Text p1Text;
+	public Text p2Text;
 	public float countdown;
 	public float ringDelay;
 	public GameObject ring;
@@ -13,6 +15,8 @@ public class GMScript : MonoBehaviour {
 	public GameObject conv_2;
 	GameObject player_1;
 	GameObject player_2;
+	float p1hp;
+	float p2hp;
 
 	void Start () {
 		player_1 = GameObject.FindGameObjectWithTag("Player 1");
@@ -20,6 +24,18 @@ public class GMScript : MonoBehaviour {
 	}
 
 	void Update () {
+		p1hp = player_1.GetComponent<PlayerScript>().health;
+		p2hp = player_2.GetComponent<PlayerScript>().health;
+
+		if (p1hp <= 0) {
+			GameEnd("Player 2");
+		} else if (p2hp <= 0) {
+			GameEnd("Player 1");
+		} else {
+			p1Text.text = "";
+			p2Text.text = "";
+        }
+
 		if (countdownText != null) {
 			if (countdown > 0) {
 				countdown -= Time.deltaTime;
@@ -49,6 +65,15 @@ public class GMScript : MonoBehaviour {
 				player_2.GetComponent<PlayerScript>().conveyorMode = false;
 				ring.SetActive(true);
 			}
+		}
+	}
+	void GameEnd (string player) {
+		if (player == "Player 1") {
+			p1Text.text = "You won!";
+			p2Text.text = "You lost...";
+		} else {
+			p1Text.text = "You lost...";
+			p2Text.text = "You won!";
 		}
 	}
 }
