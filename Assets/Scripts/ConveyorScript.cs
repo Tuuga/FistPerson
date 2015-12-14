@@ -12,6 +12,7 @@ public class ConveyorScript : MonoBehaviour {
 	public float spawnTime;
 	public float objectSpeed;
 	public float timer;
+	public bool convOn = true;
 	Vector3 trashCanPos;
 
 	void Start () {
@@ -22,7 +23,7 @@ public class ConveyorScript : MonoBehaviour {
 	void Update () {
 		MoveObjects();
 		timer += Time.deltaTime;
-		if (timer > spawnTime) {
+		if (timer > spawnTime && convOn) {
 			timer = 0;
 			SpawnObject();
 		}
