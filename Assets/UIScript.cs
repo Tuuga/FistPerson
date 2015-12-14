@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class UIScript : MonoBehaviour {
 
-	public void UIStart()
-    {
-        Application.LoadLevel("Tuukka");
-    }
+	public void UIStart () {
+		SceneManager.LoadScene("Tuukka");
+	}
 
-    public void Exit()
-    {
-        Application.Quit();
-    }
+	public void Exit () {
+		Application.Quit();
+	}
 }
