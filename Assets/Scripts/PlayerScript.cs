@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -8,6 +9,7 @@ public class PlayerScript : MonoBehaviour {
 	public KeyCode rightInput;
 	KeyCode lastKey;
 
+	public GameObject hp;
 	public GameObject leftConv;
 	public GameObject rightConv;
 	public GameObject hitEffect;
@@ -48,8 +50,10 @@ public class PlayerScript : MonoBehaviour {
 	//Lists for fists
 	List<GameObject> leftFistObjects;
 	List<GameObject> rightFistObjects;
+	float maxHP;
 
 	void Start () {
+		maxHP = health;
 		leftFistObjects = new List<GameObject>();
 		rightFistObjects = new List<GameObject>();
 
@@ -65,6 +69,10 @@ public class PlayerScript : MonoBehaviour {
 		opponentRightFistState = opponent.GetComponent<PlayerScript>().rightFistState;
 		opponentLeftDodge = opponent.GetComponent<PlayerScript>().leftDodge;
 		opponentRightDodge = opponent.GetComponent<PlayerScript>().rightDodge;
+
+		Vector3 hpScale = hp.transform.localScale;
+		hpScale = new Vector3(health / maxHP, 1, 1);
+		hp.transform.localScale = hpScale;
 
 		UpdateFist(ref leftFistState, ref leftTimer, rightFistState, ref rightTimer, leftInput, leftFist);      //LeftUpdate
 		UpdateFist(ref rightFistState, ref rightTimer, leftFistState, ref leftTimer, rightInput, rightFist);    //RightUpdate
@@ -204,16 +212,14 @@ public class PlayerScript : MonoBehaviour {
 		}
 	}
 	void Damage (GameObject fist, float chargeTime) {
+		float dm = 0;
 		opponentHealth = opponent.GetComponent<PlayerScript>().health;
-		
 		opponent.GetComponent<PlayerScript>().leftFistState = FistState.Stagger;
 		opponent.GetComponent<PlayerScript>().rightFistState = FistState.Stagger;
-		opponent.GetComponent<PlayerScript>().health = opponentHealth;
 
 		if (fist == leftFist && leftFistObjects.Count > 0) {
 			if (leftFistObjects[0] != null) {
-				float dm = leftFistObjects[0].GetComponent<ObjectScript>().damageModifier;
-                opponentHealth -= Mathf.Clamp((punchDamage + dm) * (1 + chargeTime), 0, opponentHealth);
+				dm = leftFistObjects[0].GetComponent<ObjectScript>().damageModifier;
 				leftFistObjects[0].GetComponentInChildren<MeshCollider>().enabled = true;
 				leftFistObjects[0].transform.SetParent(null);
 				leftFistObjects[0].GetComponent<Rigidbody>().isKinematic = false;
@@ -224,8 +230,7 @@ public class PlayerScript : MonoBehaviour {
 
 		} else if (rightFistObjects.Count > 0) {
 			if (leftFistObjects[0] != null) {
-				float dm = rightFistObjects[0].GetComponent<ObjectScript>().damageModifier;
-				opponentHealth -= Mathf.Clamp((punchDamage + dm) * (1 + chargeTime), 0, opponentHealth);
+				dm = rightFistObjects[0].GetComponent<ObjectScript>().damageModifier;
 				rightFistObjects[0].GetComponentInChildren<MeshCollider>().enabled = true;
 				rightFistObjects[0].transform.SetParent(null);
 				rightFistObjects[0].GetComponent<Rigidbody>().isKinematic = false;
@@ -234,6 +239,8 @@ public class PlayerScript : MonoBehaviour {
 			}
 			rightFistObjects.Remove(rightFistObjects[0]);
 		}
+		opponentHealth -= Mathf.Clamp((punchDamage + dm) * (1 + chargeTime), 0, opponentHealth);
+		opponent.GetComponent<PlayerScript>().health = opponentHealth;
 
 		//Spawns effect when you hit
 		GameObject hitIns = (GameObject)Instantiate(hitEffect, fist.transform.position, new Quaternion(0, 0, 0, 0));
