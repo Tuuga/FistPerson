@@ -81,6 +81,7 @@ public class GMScript : MonoBehaviour {
 		endScreen.SetActive(true);
 	}
 	public void Restart () {
+		Time.timeScale = 1;
 		SceneManager.LoadScene(map);
 	}
 }
