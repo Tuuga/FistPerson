@@ -127,7 +127,11 @@ public class PlayerScript : MonoBehaviour {
 			Dodge(ref currentTimer, otherTimer, currentKey, ref currentState);
 
 		} else if (currentState == FistState.Startup) {     //Startup
-			MoveTo(fistStatePos[2].position, fistStatePos[3].position, fistObject, startupTime);
+			if (!conveyorMode) {
+				MoveTo(fistStatePos[2].position, fistStatePos[3].position, fistObject, startupTime);
+			} else {
+				MoveTo(fistStatePos[12].position, fistStatePos[13].position, fistObject, startupTime);
+			}
 			if (showStateLogs)
 				Debug.Log(currentKey + ": " + currentState);
 			currentTimer += Time.deltaTime;
@@ -140,7 +144,7 @@ public class PlayerScript : MonoBehaviour {
 					currentState = FistState.Stagger;
 					other = FistState.Stagger;
 				} else {
-					if (conveyorMode == false) {
+					if (!conveyorMode) {
 						Damage(fistObject, currentChargeTime);
 					}
 					currentState = FistState.Recovery;
@@ -201,13 +205,15 @@ public class PlayerScript : MonoBehaviour {
 	}
 	void Damage (GameObject fist, float chargeTime) {
 		opponentHealth = opponent.GetComponent<PlayerScript>().health;
-		opponentHealth -= Mathf.Clamp(punchDamage * (1 + chargeTime), 0, opponentHealth);
+		
 		opponent.GetComponent<PlayerScript>().leftFistState = FistState.Stagger;
 		opponent.GetComponent<PlayerScript>().rightFistState = FistState.Stagger;
 		opponent.GetComponent<PlayerScript>().health = opponentHealth;
 
 		if (fist == leftFist && leftFistObjects.Count > 0) {
 			if (leftFistObjects[0] != null) {
+				float dm = leftFistObjects[0].GetComponent<ObjectScript>().damageModifier;
+                opponentHealth -= Mathf.Clamp((punchDamage + dm) * (1 + chargeTime), 0, opponentHealth);
 				leftFistObjects[0].GetComponentInChildren<MeshCollider>().enabled = true;
 				leftFistObjects[0].transform.SetParent(null);
 				leftFistObjects[0].GetComponent<Rigidbody>().isKinematic = false;
@@ -218,6 +224,8 @@ public class PlayerScript : MonoBehaviour {
 
 		} else if (rightFistObjects.Count > 0) {
 			if (leftFistObjects[0] != null) {
+				float dm = rightFistObjects[0].GetComponent<ObjectScript>().damageModifier;
+				opponentHealth -= Mathf.Clamp((punchDamage + dm) * (1 + chargeTime), 0, opponentHealth);
 				rightFistObjects[0].GetComponentInChildren<MeshCollider>().enabled = true;
 				rightFistObjects[0].transform.SetParent(null);
 				rightFistObjects[0].GetComponent<Rigidbody>().isKinematic = false;
@@ -256,7 +264,7 @@ public class PlayerScript : MonoBehaviour {
 		}
 	}
 	void OnTriggerEnter (Collider c) {
-		if (c.transform.parent.tag == "Object" && conveyorMode == true) {
+		if (c.transform.parent != null && c.transform.parent.tag == "Object" && conveyorMode == true) {
 			AddObject(c.transform.parent.gameObject);
 		}
 	}

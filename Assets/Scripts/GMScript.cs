@@ -7,6 +7,8 @@ public class GMScript : MonoBehaviour {
 
 	public Text countdownText;
 	public float countdown;
+	public float ringDelay;
+	public GameObject ring;
 	public GameObject conv_1;
 	public GameObject conv_2;
 	GameObject player_1;
@@ -22,9 +24,10 @@ public class GMScript : MonoBehaviour {
 			if (countdown > 0) {
 				countdown -= Time.deltaTime;
 				countdownText.text = "" + Mathf.Round(countdown);
+
 			} else {
 				Transition();
-				countdownText.text = "Zero";
+				countdownText.text = "";
 			}
 		}
 	}
@@ -37,10 +40,15 @@ public class GMScript : MonoBehaviour {
 	}
 	void Transition () {
 		if (player_1 != null && player_2 != null) {
-			player_1.GetComponent<PlayerScript>().conveyorMode = false;
-			player_2.GetComponent<PlayerScript>().conveyorMode = false;
 			conv_1.GetComponent<ConveyorScript>().convOn = false;
 			conv_2.GetComponent<ConveyorScript>().convOn = false;
+
+			ringDelay -= Time.deltaTime;
+			if (ringDelay < 0f) {
+				player_1.GetComponent<PlayerScript>().conveyorMode = false;
+				player_2.GetComponent<PlayerScript>().conveyorMode = false;
+				ring.SetActive(true);
+			}
 		}
 	}
 }

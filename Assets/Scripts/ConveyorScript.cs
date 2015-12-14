@@ -38,10 +38,20 @@ public class ConveyorScript : MonoBehaviour {
 		for (int i = 0; i < allObjects.Count; i++) {
 			Vector3 pos = allObjects[i].transform.position;
 			allObjects[i].transform.position += (trashCanPos - pos).normalized * Time.deltaTime * objectSpeed;
+			/*
 			if ((trashCanPos - pos).magnitude < 0.1f) {
 				Destroy(allObjects[i]);
 				allObjects.Remove(allObjects[i]);
             }
+			*/
+		}
+	}
+	public void DropObject(GameObject g) {
+		g.GetComponent<Rigidbody>().isKinematic = false;
+		for (int i = 0; i < allObjects.Count; i++) {
+			if (allObjects[i] == g) {
+				allObjects.Remove(g);
+			}
 		}
 	}
 }
